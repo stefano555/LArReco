@@ -17,6 +17,12 @@
 #include "larpandoracontent/LArPersistency/EventReadingAlgorithm.h"
 #include "larpandoracontent/LArPlugins/LArPseudoLayerPlugin.h"
 #include "larpandoracontent/LArPlugins/LArRotationalTransformationPlugin.h"
+#include "calohit_propertiesAlgorithm.h"
+#include "Info_CaloHitAlgorithm.h"
+#include "Info_CaloHitAlgorithm2.h"
+#include "Info_CaloHitAlgorithm3.h"
+#include "pcaAlgorithm.h"
+#include "tree_makerAlgorithm.h"
 
 #include "PandoraInterface.h"
 
@@ -93,7 +99,14 @@ void CreatePandoraInstances(const Parameters &parameters, const Pandora *&pPrima
     ProcessExternalParameters(parameters, pPrimaryPandora);
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::SetPseudoLayerPlugin(*pPrimaryPandora, new lar_content::LArPseudoLayerPlugin));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::SetLArTransformationPlugin(*pPrimaryPandora, new lar_content::LArRotationalTransformationPlugin));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*pPrimaryPandora,"calohit_propertiesAlgorithm",new lar_reco::calohit_propertiesAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*pPrimaryPandora,"Info_CaloHitAlgorithm",new lar_reco::Info_CaloHitAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*pPrimaryPandora,"Info_CaloHitAlgorithm2",new lar_reco::Info_CaloHitAlgorithm2::Factory));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*pPrimaryPandora,"Info_CaloHitAlgorithm3",new lar_reco::Info_CaloHitAlgorithm3::Factory));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*pPrimaryPandora,"pcaAlgorithm",new lar_reco::pcaAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*pPrimaryPandora,"tree_makerAlgorithm",new lar_reco::tree_makerAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*pPrimaryPandora, parameters.m_settingsFile));
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
