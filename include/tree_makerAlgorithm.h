@@ -59,7 +59,7 @@ private:
     /**
      *  @brief  Is track
      */
-    void vector_shifter(const pandora::CaloHitList &CaloHitVector,pandora::FloatVector &drifttime_bis_vector,pandora::FloatVector &zplane_bis_vector,int centre);
+     void vector_shifter(const pandora::FloatVector &drifttime_vector,const pandora::FloatVector &zplane_vector,pandora::FloatVector &drifttime_bis_vector,pandora::FloatVector &zplane_bis_vector,int centre);
     /**
      *  @brief  Is track
      */
@@ -75,7 +75,7 @@ private:
     /**
      *  @brief  Is track
      */
-    void histogram_study(int number_x_bin,int number_y_bin, float &bins_occupied,float &av_distance,float &av_energy_bin,pandora::FloatVector &binx_vector,pandora::FloatVector &biny_vector,pandora::FloatVector &energy_bin,TH2* hgrid,float total_bins);
+    void histogram_study(int number_x_bin,int number_y_bin, float &bins_occupied,float &av_distance,float &av_energy_bin,pandora::FloatVector &binx_vector,pandora::FloatVector &biny_vector,pandora::FloatVector &energy_bin,TH2* hgrid,float total_bins, float &tot_energy);
     /**
      *  @brief  Is track
      */

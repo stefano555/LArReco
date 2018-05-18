@@ -65,7 +65,7 @@ StatusCode tree_makerAlgorithm::Run()
 	int centre=0;
 	
         std::vector<float> drifttime_vector; // drift-time position
-	CaloHitList CaloHitVector;
+	//CaloHitList CaloHitVector;
 	std::vector<float> zplane_vector;    // z-plane position
 	std::vector<float> ex_vector;        // half-size of the wave width
 	std::vector<float> ey_vector;        // half wire pitch
@@ -80,7 +80,7 @@ StatusCode tree_makerAlgorithm::Run()
 	std::vector<float> full_weight_vector;
 	std::vector<float> energy_bin_edge;
 
-	int idx(0);
+	//int idx(0);
  
 	for(const CaloHit *const pCaloHit : *pCaloHitList)
 	{
@@ -88,8 +88,8 @@ StatusCode tree_makerAlgorithm::Run()
 		{
 			continue;
 		}
-                idx++;
-                CaloHitVector.push_back(pCaloHit);
+               // idx++;
+               // CaloHitVector.push_back(pCaloHit);
                 drifttime_vector.push_back(pCaloHit->GetPositionVector().GetX());
 	 	zplane_vector.push_back(pCaloHit->GetPositionVector().GetZ());
 		ex_vector.push_back((pCaloHit->GetCellSize1())/2);
@@ -180,7 +180,7 @@ StatusCode tree_makerAlgorithm::Run()
 		hgrid->GetYaxis()->SetDecimals();
 		hgrid->GetYaxis()->SetTitleOffset(1.2);
 		//hgrid->GetXaxis()->SetNdivisions(-11);//messo dopo per tentativi
-		this->vector_shifter(CaloHitVector,drifttime_bis_vector,zplane_bis_vector,centre);
+		this->vector_shifter(drifttime_vector,zplane_vector,drifttime_bis_vector,zplane_bis_vector,centre);
 		this->histogram_filler_gaussian(ex_vector,hgrid,charge_vector,drifttime_bis_vector,zplane_bis_vector);
 //Filling other 2 small histogram with total weight and track-weight
 		TH2* hgridtotal = new TH2F(this->safe_name("hgridtotal"), title.c_str(), number_x_bin, -min_x, max_x, number_y_bin, -min_y, max_y);
@@ -229,7 +229,8 @@ StatusCode tree_makerAlgorithm::Run()
 		float bins_occupied = 0;
 		float av_distance=0;
 		float av_energy_bin=0;
-		this->histogram_study(number_x_bin,number_y_bin,bins_occupied,av_distance,av_energy_bin,binx_vector,biny_vector,energy_bin,hgrid, total_bins);
+		float tot_energy=0;
+		this->histogram_study(number_x_bin,number_y_bin,bins_occupied,av_distance,av_energy_bin,binx_vector,biny_vector,energy_bin,hgrid, total_bins,tot_energy);
 		float rms_energy = this->rms_calculator(energy_bin, av_energy_bin);
 		float total_weight_histo = this->histogram_reader(number_x_bin,number_y_bin,hgridtotal);
 		float track_weight_histo = this->histogram_reader(number_x_bin,number_y_bin,hgridtrack);
@@ -284,8 +285,7 @@ StatusCode tree_makerAlgorithm::Run()
 		{
 			crossed_energy=this->crossed_energy_calculator(binx_vector,biny_vector,energy_bin,eigenvector_major_weighted,x_average_weighted,z_average_weighted,howbigbinx,howbigbinz);
 		}
-		float tot_energy2 = accumulate(energy_bin.begin(),energy_bin.end(), 0.0);
-		float ratio_crossed_energy = float (crossed_energy)/tot_energy2;
+		float ratio_crossed_energy = float (crossed_energy)/tot_energy;
 
 //Rotation method
 		std::string title2;
@@ -308,7 +308,12 @@ StatusCode tree_makerAlgorithm::Run()
 
 		std::cout <<"just to use them " << rms_energy << ratio_weight_histo << axis_ratio_weighted << centroid_distance_weighted <<sd_distance_from_axis <<ratio_crossed_energy << deviation << diff_charge << is_track <<std::endl;
 
-		std::cout << "bins_occupied " << bins_occupied << " ,deviation " << deviation << " ,diff_charge " << diff_charge << " ,major axis " << major_axis_weighted << " ,minor axis " << minor_axis_weighted <<  " ,isGoodCaloHit? " << isGoodCaloHit << " , angle " << angle << std::endl;
+		std::cout << "bins_occupied " << bins_occupied << " ,deviation " << deviation << " ,diff_charge " << diff_charge << " ,major axis " << major_axis_weighted << " ,minor axis " << minor_axis_weighted <<  " ,isGoodCaloHit? " << isGoodCaloHit << " , angle " << angle << " ,tot energy " << tot_energy <<  std::endl;
+		std::cout << "centroid x " << x_average_weighted << " , z " << z_average_weighted << std::endl;
+
+		std::cout << "MATRIX " << std::endl;
+		std::cout << covariance.GetElement1() << " " << covariance.GetElement2() << std::endl;
+		std::cout << covariance.GetElement2() << " " << covariance.GetElement3() << std::endl;
 
 //////MONTECARLO PARTICLE//////////////////////////
 		std::string title_montecarlo;
@@ -637,12 +642,12 @@ int tree_makerAlgorithm::IsTrack(int id_centre)
     }
 }
 //------------------------------------------------------------------------------------------------------------------------------------------
-void tree_makerAlgorithm::vector_shifter(const CaloHitList &CaloHitVector,FloatVector &drifttime_bis_vector,FloatVector &zplane_bis_vector,int centre)
+void tree_makerAlgorithm::vector_shifter(const FloatVector &drifttime_vector,const FloatVector &zplane_vector,FloatVector &drifttime_bis_vector,FloatVector &zplane_bis_vector,int centre)
 {
-    for(int i=0; i<CaloHitVector.size(); i++)
+    for(int i=0; i<drifttime_vector.size(); i++)
     {
-	drifttime_bis_vector.push_back(CaloHitVector.at(i)->GetPositionVector().GetX()-CaloHitVector.at(centre)->GetPositionVector().GetX());//+(howbigbinx/2));
-        zplane_bis_vector.push_back(CaloHitVector.at(i)->GetPositionVector().GetZ()-CaloHitVector.at(centre)->GetPositionVector().GetZ());//+(howbigbinx/2));
+	drifttime_bis_vector.push_back(drifttime_vector.at(i)-drifttime_vector.at(centre));//+(howbigbinx/2));
+        zplane_bis_vector.push_back(zplane_vector.at(i)-zplane_vector.at(centre));//+(howbigbinx/2));
     }
 }
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -689,12 +694,11 @@ TString tree_makerAlgorithm::safe_name(const TString &initial_name)
 return TString(initial_name);
 } 
 //------------------------------------------------------------------------------------------------------------------------------------------
-void tree_makerAlgorithm::histogram_study(int number_x_bin, int number_y_bin,float &bins_occupied,float &av_distance,float &av_energy_bin,FloatVector &binx_vector,FloatVector &biny_vector,FloatVector &energy_bin,TH2* hgrid,float total_bins)
+void tree_makerAlgorithm::histogram_study(int number_x_bin, int number_y_bin,float &bins_occupied,float &av_distance,float &av_energy_bin,FloatVector &binx_vector,FloatVector &biny_vector,FloatVector &energy_bin,TH2* hgrid,float total_bins,float &tot_energy)
 {
     float tot_distance=0;
     double bin_content = 0;
     int filled_bins = 0;
-    float tot_energy=0;
     float distance = 0;
     float distanceX=0;
     float distanceY=0;
@@ -782,7 +786,10 @@ void tree_makerAlgorithm::covariance_matrix(const FloatVector &binx_vector, cons
     for(unsigned int element = 0; element<binx_vector.size(); element++)
     {	
         b_x_weighted_vector.push_back((binx_vector.at(element)-x_average_weighted));
-	b_z_weighted_vector.push_back((biny_vector.at(element)-z_average_weighted));		
+	b_z_weighted_vector.push_back((biny_vector.at(element)-z_average_weighted));	
+	//std::cout << "element 1 " << energy_bin.at(element)*b_x_weighted_vector.at(element)*b_x_weighted_vector.at(element) << std::endl; //togli
+	std::cout << "element 2 " << energy_bin.at(element)*b_x_weighted_vector.at(element)*b_z_weighted_vector.at(element) << std::endl; //togli
+	//std::cout << "element 3 " << energy_bin.at(element)*b_z_weighted_vector.at(element)*b_z_weighted_vector.at(element) << std::endl; //togli
 	element_1_weighted=element_1_weighted+(energy_bin.at(element)*b_x_weighted_vector.at(element)*b_x_weighted_vector.at(element));
         element_3_weighted=element_3_weighted+(energy_bin.at(element)*b_z_weighted_vector.at(element)*b_z_weighted_vector.at(element));
 	element_2_weighted=element_2_weighted+(energy_bin.at(element)*b_x_weighted_vector.at(element)*b_z_weighted_vector.at(element));	

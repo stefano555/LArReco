@@ -104,7 +104,7 @@ private:
     /**
      *  @brief  Is track
      */
-    void histogram_study(int number_x_bin,int number_y_bin, float &bins_occupied,float &av_distance,float &av_energy_bin,pandora::FloatVector &binx_vector,pandora::FloatVector &biny_vector,pandora::FloatVector &energy_bin,TH2* hgrid,float total_bins);
+    void histogram_study(int number_x_bin,int number_y_bin, float &bins_occupied,float &av_distance,float &av_energy_bin,pandora::FloatVector &binx_vector,pandora::FloatVector &biny_vector,pandora::FloatVector &energy_bin,TH2* hgrid,float total_bins, float &tot_energy);
     /**
      *  @brief  Is track
      */

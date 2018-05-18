@@ -188,7 +188,8 @@ StatusCode calohit_propertiesAlgorithm::Run()
 		float bins_occupied = 0;
 		float av_distance=0;
 		float av_energy_bin=0;
-		this->histogram_study(number_x_bin,number_y_bin,bins_occupied,av_distance,av_energy_bin,binx_vector,biny_vector,energy_bin,hgrid, total_bins);
+		float tot_energy=0;
+		this->histogram_study(number_x_bin,number_y_bin,bins_occupied,av_distance,av_energy_bin,binx_vector,biny_vector,energy_bin,hgrid, total_bins,tot_energy);
 		float rms_energy = this->rms_calculator(energy_bin, av_energy_bin);
 		float total_weight_histo = this->histogram_reader(number_x_bin,number_y_bin,hgrid2);
 		float track_weight_histo = this->histogram_reader(number_x_bin,number_y_bin,hgrid3);
@@ -232,8 +233,7 @@ StatusCode calohit_propertiesAlgorithm::Run()
 		{
 			crossed_energy=this->crossed_energy_calculator(binx_vector,biny_vector,energy_bin,eigenvector_major_weighted,x_average_weighted,z_average_weighted,howbigbinx,howbigbinz);
 		}
-		float tot_energy2 = accumulate(energy_bin.begin(),energy_bin.end(), 0.0);
-		float ratio_crossed_energy = float (crossed_energy)/tot_energy2;
+		float ratio_crossed_energy = float (crossed_energy)/tot_energy;
 		
 //Rotation method
 		std::string title2;
@@ -287,6 +287,8 @@ StatusCode calohit_propertiesAlgorithm::Run()
 		PANDORA_MONITORING_API(SetTreeVariable(this->GetPandora(), m_treeName.c_str(), "eigenvector_major_weighted", eigenvector_major_weighted));//test
 		PANDORA_MONITORING_API(SetTreeVariable(this->GetPandora(), m_treeName.c_str(), "major_eigenvalue", major_axis_weighted));//test
 		PANDORA_MONITORING_API(SetTreeVariable(this->GetPandora(), m_treeName.c_str(), "minor_eigenvalue", minor_axis_weighted));//test
+		PANDORA_MONITORING_API(SetTreeVariable(this->GetPandora(), m_treeName.c_str(), "centroid_x", x_average_weighted));//test
+		PANDORA_MONITORING_API(SetTreeVariable(this->GetPandora(), m_treeName.c_str(), "centroid_y", z_average_weighted));//test
 		PANDORA_MONITORING_API(FillTree(this->GetPandora(), m_treeName.c_str()));
 		
 //Deleting objects before exiting for loop		
@@ -371,12 +373,11 @@ TString calohit_propertiesAlgorithm::safe_name(const TString &initial_name)
 return TString(initial_name);
 } 
 //------------------------------------------------------------------------------------------------------------------------------------------
-void calohit_propertiesAlgorithm::histogram_study(int number_x_bin, int number_y_bin,float &bins_occupied,float &av_distance,float &av_energy_bin,FloatVector &binx_vector,FloatVector &biny_vector,FloatVector &energy_bin,TH2* hgrid,float total_bins)
+void calohit_propertiesAlgorithm::histogram_study(int number_x_bin, int number_y_bin,float &bins_occupied,float &av_distance,float &av_energy_bin,FloatVector &binx_vector,FloatVector &biny_vector,FloatVector &energy_bin,TH2* hgrid,float total_bins, float &tot_energy)
 {
     float tot_distance=0;
     double bin_content = 0;
     int filled_bins = 0;
-    float tot_energy=0;
     float distance = 0;
     float distanceX=0;
     float distanceY=0;
