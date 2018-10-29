@@ -50,6 +50,21 @@ private:
         float m_element2;
         float m_element3;
     };	
+    class calohitclass
+    {
+    // Access specifier
+    public:
+      	calohitclass(pandora::CaloHitList mylist);
+
+	
+	pandora::CaloHitList GetList() const;
+    // Data Members
+    private:
+        pandora::CaloHitList m_mylist;
+    };
+    typedef std::map<const pandora::CaloHit *,calohitclass> MyMap;
+    typedef std::map<const int,const pandora::CaloHit *> CaloMap;
+
 
     // Member variables here
     /**
@@ -120,6 +135,17 @@ private:
      *  @brief  it returns the amount of energy lost during rotation
      */
     float difference_charge(int number_x_bin, int number_y_bin, float rot_charge, float energy_sum);
+    /**
+     *  @brief  it returns the amount of energy lost during rotation
+     */
+    void IsParentAMuon(const pandora::MCParticle *pMCParticle, bool &hasParentMuon);
+    /**
+     *  @brief  it returns the amount of energy lost during rotation
+     */
+    void chisquare_calculator(const float slope,const float calo_centroid_x,const float calo_centroid_z,const float wire_pitch, float &chisquare,const MyMap &calohitmap,const int centre,const CaloMap &inttocalo);
+    /**
+     *  @brief  it calculates the chi square value of the pca major axis
+     */
 
 };
 
@@ -153,6 +179,11 @@ inline float tree_makerAlgorithm::matrix::GetElement3() const
 inline void tree_makerAlgorithm::matrix::SetElement3(float element) 
 {
     m_element3 = element;
+}
+//------------------------------------------------------------------------------------------------------------------------------------------
+inline pandora::CaloHitList tree_makerAlgorithm::calohitclass::GetList() const
+{
+    return m_mylist;
 }
 //------------------------------------------------------------------------------------------------------------------------------------------
 inline pandora::Algorithm *tree_makerAlgorithm::Factory::CreateAlgorithm() const

@@ -24,6 +24,7 @@ namespace lar_reco
  */
 class calohit_propertiesAlgorithm : public pandora::Algorithm
 {
+   
     /**
      *  @brief  Constructor
      */
@@ -64,6 +65,19 @@ private:
         float m_element2;
         float m_element3;
     };	
+    class calohitclass
+    {
+    // Access specifier
+    public:
+      	calohitclass(pandora::CaloHitList mylist);
+	
+	pandora::CaloHitList GetList() const;
+    // Data Members
+    private:
+        pandora::CaloHitList m_mylist;
+    };
+    typedef std::map<const pandora::CaloHit *,calohitclass> MyMap;
+    typedef std::map<const int,const pandora::CaloHit *> CaloMap;
     class simulated
     {
     // Access specifier
@@ -149,12 +163,24 @@ private:
      *  @brief  it returns the amount of energy lost during rotation
      */
     float difference_charge(int number_x_bin, int number_y_bin, float rot_charge, float energy_sum);
-
+    /**
+     *  @brief  it returns the amount of energy lost during rotation
+     */
+    void IsParentAMuon(const pandora::MCParticle *pMCParticle, bool &hasParentMuon);
+    /**
+     *  @brief  
+     */
+    void chisquare_calculator(const float slope,const float calo_centroid_x,const float calo_centroid_z,const float wire_pitch, float &chisquare,const MyMap &calohitmap,const int centre, const CaloMap &inttocalo);
+    /**
+     *  @brief  it calculates the chi square value of the pca major axis
+     */
     pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     // Member variables here
 	std::string m_treeName;
+	int m_file_counter;
 	std::string m_fileName;
+	
         int m_eventNumber;
 };
 
@@ -208,6 +234,11 @@ inline pandora::FloatVector calohit_propertiesAlgorithm::simulated::GetWeight() 
 inline void calohit_propertiesAlgorithm::simulated::SetWeight(pandora::FloatVector element)
 {
     m_weight = element;
+}
+//------------------------------------------------------------------------------------------------------------------------------------------
+inline pandora::CaloHitList calohit_propertiesAlgorithm::calohitclass::GetList() const
+{
+    return m_mylist;
 }
 //------------------------------------------------------------------------------------------------------------------------------------------
 inline pandora::Algorithm *calohit_propertiesAlgorithm::Factory::CreateAlgorithm() const
